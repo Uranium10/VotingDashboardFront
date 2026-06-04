@@ -6,7 +6,7 @@ import {
 import './ChartUI.css';
 
 // 💡 안전한 서버 주소 하드코딩
-const API = 'https://port-0-votingdashboardserver-mpz7fuz0e609fe68.sel3.cloudtype.app/';
+const API = 'https://port-0-votingdashboardserver-mpz7fuz0e609fe68.sel3.cloudtype.app';
 
 function useFetch(url) {
   const [data, setData] = useState(null);
