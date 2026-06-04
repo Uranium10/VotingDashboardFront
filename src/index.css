@@ -1,0 +1,8 @@
+/* index.css 전체 교체 (이것만 남기세요) */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}

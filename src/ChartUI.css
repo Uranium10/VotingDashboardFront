@@ -1,0 +1,539 @@
+/* ============================================================
+   ChartUI.css — 선거 대시보드 차트 패널 스타일
+   ============================================================
+   디자인 방향: 데이터 저널리즘 스타일의 다크 대시보드
+   - 배경: 짙은 네이비 (#0d1117) 계열
+   - 강조: 선거 정당색 + 흰색 타이포
+   - 폰트: Noto Sans KR (한국어) + DM Mono (숫자/퍼센트)
+   - 애니메이션: 슬라이드업 + 카드별 stagger reveal
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── CSS 변수 ───────────────────────────────────────────── */
+:root {
+  --bg-panel:     #0f1923;       /* 패널 배경 */
+  --bg-card:      #162030;       /* 카드 배경 */
+  --bg-card-alt:  #1a2840;       /* 호버 카드 */
+  --border:       rgba(83,143,255,0.15);
+  --border-glow:  rgba(83,143,255,0.4);
+  --text-primary: #e8edf5;
+  --text-sub:     #c4cbd4;
+  --text-muted:   #8e9cb1;
+  --accent-blue:  #538fff;
+  --민주:         #2673cc;
+  --보수:         #E61E2B;
+  --기타:         #6e5e5e;
+  --초경합:       #e74c3c;
+  --경합:         #e67e22;
+  --우세:         #27ae60;
+  --압승:         #2ecc71;
+  --font-kr:      'Noto Sans KR', sans-serif;
+  --font-num:     'DM Mono', monospace;
+  --radius:       10px;
+  --radius-sm:    6px;
+  --transition:   0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* ── 스크롤바 커스텀 ────────────────────────────────────── */
+.chart-panel::-webkit-scrollbar        { width: 4px; }
+.chart-panel::-webkit-scrollbar-track  { background: transparent; }
+.chart-panel::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 2px; }
+
+/* ── 패널 내부 공통 래퍼 ────────────────────────────────── */
+.cu-inner {
+  padding: 0 0 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  font-family: var(--font-kr);
+  color: var(--text-primary);
+  background: var(--bg-panel);
+  min-height: 100%;
+}
+
+/* ── 섹션 구분선 ────────────────────────────────────────── */
+.cu-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 16px;
+}
+
+/* ── 섹션 헤더 ──────────────────────────────────────────── */
+.cu-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px 10px;
+  font-family: var(--font-kr);
+}
+.cu-section-header .cu-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent-blue);
+  flex-shrink: 0;
+}
+.cu-section-header h3 {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  font-family: var(--font-kr);
+  margin: 0;
+}
+
+/* ── 로딩 스피너 ────────────────────────────────────────── */
+.cu-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+.cu-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 에러 표시 ──────────────────────────────────────────── */
+.cu-error {
+  padding: 12px 16px;
+  background: rgba(231,76,60,0.1);
+  border-left: 3px solid #e74c3c;
+  margin: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  color: #e74c3c;
+}
+
+/* ============================================================
+   경합 게이지 섹션 (최상단)
+   ============================================================ */
+.cu-competition {
+  padding: 16px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+
+/* 지역명 + 경쟁도 뱃지 */
+.cu-comp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.cu-region-name {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+.cu-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+.cu-badge.초경합 { background: rgba(231,76,60,0.2);  color: var(--초경합); border: 1px solid rgba(231,76,60,0.4); }
+.cu-badge.경합   { background: rgba(230,126,34,0.2);  color: var(--경합); border: 1px solid rgba(230,126,34,0.4); }
+.cu-badge.우세   { background: rgba(39,174,96,0.2);   color: var(--우세); border: 1px solid rgba(39,174,96,0.4); }
+.cu-badge.압승예상 { background: rgba(46,204,113,0.15); color: var(--압승); border: 1px solid rgba(46,204,113,0.3); }
+.cu-badge.결과없음 { background: rgba(124, 124, 124, 0.15); color: white; border: 1px solid rgba(156, 156, 156, 0.3); }
+
+/* 날짜/예측 라벨 */
+.cu-poll-meta {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  font-family: var(--font-num);
+}
+
+/* 후보 게이지 행 */
+.cu-cand-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cu-cand-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cu-cand-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.cu-cand-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.cu-cand-party {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  margin-left: 6px;
+}
+.cu-cand-rate {
+  font-family: var(--font-num);
+  font-size: 1rem;
+  font-weight: 500;
+}
+.cu-cand-winner-tag {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(83,143,255,0.2);
+  color: var(--accent-blue);
+  margin-left: 6px;
+  font-family: var(--font-num);
+}
+
+/* 게이지 바 */
+.cu-gauge-track {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.cu-gauge-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+}
+/* 당선 예측 후보 게이지에 글로우 */
+.cu-gauge-fill.winner-glow::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 20px;
+  background: inherit;
+  filter: blur(6px);
+  opacity: 0.6;
+}
+
+/* 격차 표시 */
+.cu-gap-display {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-sub);
+  font-family: var(--font-num);
+}
+.cu-gap-display span {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ============================================================
+   지지율 파이/도넛 섹션
+   ============================================================ */
+.cu-support {
+  padding: 0 16px 16px;
+}
+
+/* 탭 (전체 / 성별 / 연령별) */
+.cu-tab-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+}
+.cu-tab-btn {
+  flex: 1;
+  padding: 5px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-radius: 4px;
+  transition: var(--transition);
+  font-family: var(--font-kr);
+  letter-spacing: 0.03em;
+}
+.cu-tab-btn.active {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+/* 차트 + 범례 레이아웃 */
+.cu-support-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.cu-donut-wrap {
+  flex-shrink: 0;
+  position: relative;
+}
+.cu-donut-wrap svg {
+  transform: rotate(-90deg);
+}
+/* 도넛 중앙 텍스트 */
+.cu-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.cu-donut-center .cu-dc-val {
+  font-family: var(--font-num);
+  font-size: 1.1rem;
+  font-weight: 500;
+  line-height: 1;
+}
+.cu-donut-center .cu-dc-label {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* 범례 */
+.cu-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cu-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.cu-legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.cu-legend-info {
+  flex: 1;
+}
+.cu-legend-name {
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.cu-legend-val {
+  font-family: var(--font-num);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* 성별 / 연령별 막대차트 */
+.cu-bar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cu-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cu-bar-label {
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  width: 52px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.cu-bar-stack {
+  flex: 1;
+  height: 14px;
+  display: flex;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.cu-bar-seg {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.cu-bar-pct {
+  font-family: var(--font-num);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  width: 32px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   여론조사 추이 라인차트 (Recharts)
+   ============================================================ */
+.cu-trend { padding: 0 8px 8px; }
+
+/* ============================================================
+   이탈율 바차트
+   ============================================================ */
+.cu-abstention { padding: 0 8px 8px; }
+
+/* ============================================================
+   우측 패널 — 전국 데이터
+   ============================================================ */
+
+/* 당선확률 수평 바 */
+.cu-pred-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 16px 8px;
+}
+.cu-pred-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.cu-pred-region {
+  width: 72px;
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cu-pred-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cu-pred-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.7s ease;
+}
+.cu-pred-winner {
+  width: 64px;
+  font-size: 0.62rem;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cu-pred-prob {
+  font-family: var(--font-num);
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  width: 34px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 경합도 리스트 (격차 %p) */
+.cu-gap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 16px 8px;
+}
+.cu-gap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+.cu-gap-region {
+  width: 72px;
+  font-size: 0.65rem;
+  color: var(--text-sub);
+  flex-shrink: 0;
+}
+.cu-gap-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.cu-gap-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.7s ease;
+}
+.cu-gap-val {
+  font-family: var(--font-num);
+  font-size: 0.65rem;
+  width: 38px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* 당선 수 비교 막대 */
+.cu-wins-chart { padding: 0 16px 8px; }
+
+/* 시도별 기권율 */
+.cu-abstention-sido { padding: 0 8px 8px; }
+
+/* 하우스 이펙트 박스플롯 영역 */
+.cu-house { padding: 0 8px 8px; }
+
+/* 전국 패널 탭 (예측/경합도 전환) */
+.cu-global-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 10px 16px 0;
+}
+.cu-global-tab {
+  padding: 4px 10px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-kr);
+}
+.cu-global-tab.active {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: #fff;
+}
+.cu-turnoutSectionGauge{
+  height: 3px;
+  width: 100%;
+  bottom: 3px;
+  margin-left: -20px;
+  background-color: #444444;
+  position: absolute;
+  overflow: hidden;
+  display: flex;
+}
+/* ── Stagger 등장 애니메이션 ─────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* .cu-animate {
+  animation: fadeSlideUp 0.4s ease both;
+}
+.cu-animate:nth-child(1)  { animation-delay: 0.05s; }
+.cu-animate:nth-child(2)  { animation-delay: 0.10s; }
+.cu-animate:nth-child(3)  { animation-delay: 0.15s; }
+.cu-animate:nth-child(4)  { animation-delay: 0.20s; }
+.cu-animate:nth-child(5)  { animation-delay: 0.25s; }
+.cu-animate:nth-child(6)  { animation-delay: 0.30s; }
+.cu-animate:nth-child(7)  { animation-delay: 0.35s; }
+.cu-animate:nth-child(8)  { animation-delay: 0.40s; } */

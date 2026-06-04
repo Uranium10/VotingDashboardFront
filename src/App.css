@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=DM+Mono:wght@400;500&display=swap');
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /*지도가 올라오면 하얀색으로 변경 - 안개 처리*/
+  background-color: #a0a0a0;
+  --font-kr:      'Noto Sans KR', sans-serif;
+  --font-num:     'DM Mono', monospace;
+}
+
+.tab-ui {
+  /*부모가 상대 좌표의 기준이 되도록 설정*/
+  position: absolute;
+  top: 12px;
+  left: 2%;
+  width: 65%;
+  z-index: 10;
+  border-radius: 12px;
+  overflow: hidden;
+  border-left: 12px solid #538fff;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease 0s;
+  /* 
+  left:50%;
+  transform: translateX(-50%);
+  */
+}
+.tab-ui.active {
+  left: 10%;
+}
+.tab-title{
+  width: 100%;
+  padding: 6px 0;
+  padding-left: 8px;
+  position: relative;
+  color: white;
+  left: 0;
+  top: 0;
+  background-color: #538fff;
+  font-family: var(--font-kr);
+}
+.tab-bar{
+  display: flex;
+  background-color: #ffffff;
+  padding: 0 25px;
+  position: relative;
+}
+.tab-but{
+  /* 상하, 좌우 */
+  padding: 1.2vh 1.6vw;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 13;
+  /* rem은 최상단 html태그 폰트 비율, vw는 화면대비 % */
+}
+.tab-but > span.main-tab {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #5177a5;
+  transition: all 0.3s ease-in-out;
+  z-index: 14;
+  font-family: var(--font-kr);
+}
+.tab-but.select > span.main-tab {
+  color: #ffffff !important;
+}
+.tab-indicator{
+  /* z-index는 position:static(기본) 제외에서만 동작*/
+  top: 0;
+  left: 0;
+  /* 큐빅 베지어 : x = y(0-1) 직선에 두 베지어 제어점을 찍는다.*/
+  /* x1, y1, x2, y2 cubic-bezier(0.1, -0.3, 0.9, 1.3)*/
+  transition: all 0.3s ease-in-out;
+  background-color: #538fff;
+  position: absolute;
+  height: 100%;
+  z-index: 12;
+}
+.tab-but > span.sub-tab{
+  font-size: 0.6rem;
+  font-weight: bold;
+  color: #717a85;
+  transition: all 0.3s ease-in-out;
+  z-index: 13;
+}
+.tab-but.select > span.sub-tab{
+  color : #fff !important;
+  font-size: 0.6rem;
+}
+.back-but{
+  position: absolute;
+  top: 1.5vh;
+  right: 1.5vw;
+  background-color: white;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  padding: auto auto;
+  font-weight: bold;
+  font-size: 1rem;
+  border-radius: 12px;
+  color:#538fff;
+  border-style: none;
+  border-right: 8px, solid rgb(83, 143, 255);
+  z-index: 10;
+  user-select: none;
+  /*border-bottom: 14px solid #538fff;*/
+}
+
+.back-but:active{
+  box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1);
+  margin-top : 4px;
+}
+
+/*-----GeoCanvas-----*/
+.GeoCanvasDiv {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+.svg-map__location {
+  fill: #ffffff;
+  stroke: #3e8bff;
+  stroke-width: 1px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.svg-map__location:hover,
+.svg-map__location:focus{
+  fill: #3e8bff;
+  outline: none;
+}
+.chart-container{
+  pointer-events: none;
+  /* 탭을 눌러도 이 요소가 선택되지 않게 해야함 */
+  visibility:hidden;
+  transform: translateY(100vh);
+  opacity: 0;
+  backdrop-filter: blur(3px);
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0vh;
+  left: 0vw;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s,
+              opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.2s,
+              visibility 0.3s linear 0.6s;
+}
+.chart-container.active {
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: all;
+  opacity: 1;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.6s,
+              opacity 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.6s,
+              visibility 0s linear 0s;
+}
+.chart-ui {
+  position:absolute;
+  background-color: rgba(48, 48, 48, 0.6);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  top: 15vh;
+  left: 10vw;
+  width: 80vw;
+  height: 80vh;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  gap: 20px;
+}
+.chart-panel {
+  position: relative;
+  flex-grow: 1;
+  flex-basis: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1),
+    inset 0 -10px 10px rgba(0, 0, 0, 0.1);
+}
+.chart-container .chart-local {
+  flex-grow: 4;
+  transform: translateX(-100vw);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0s,
+              flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0s;
+              
+  box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.2);
+  /* top: 0vh;
+  left: 0vw;
+  width: 25vw;
+  height: 80vh; */
+  background-color: white;
+}
+.chart-container.active .chart-local {
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.9s,
+              flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0s;
+}
+
+.chart-container .chart-global {
+  transform: translateX(100vw);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0s,
+              flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0s;
+  /* top: 0vh;
+  left: 0vw;
+  width: 25vw;
+  height: 80vh; */
+  background-color: rgb(206, 206, 206);
+}
+
+.chart-container.active .chart-global {
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) 0.9s,
+              flex-grow 0.5s cubic-bezier(0.25, 0.8, 0.25, 1) 0s;
+  text-align: center;
+}
+.chart-container.active .chart-global:hover {
+  flex-grow: 16;
+}
+
+.chart-title {
+  /* 부모 요소의 특정 위치에 딱 붙는다. top등을 설정해주면 스크롤해도 안내려간다. */
+  position:sticky;
+  top: 0;
+  background-color: #538fff;
+  padding: 12px 12px;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  overflow-y: hidden;
+}
+.chart-title > span{
+  color : white;
+  font-weight: bold;
+  left: 12px;
+  white-space: nowrap;       /* 줄 바꿈 방지 */
+  overflow: hidden;           /* 스크롤바 방지*/
+  /* text-overflow: ellipsis;   잘린 부분을 ... 처리 */
+}
